@@ -11,9 +11,7 @@ import androidx.annotation.Nullable;
 
 import com.yk.player.media.VideoPlayer;
 
-public class VideoView extends TextureView implements TextureView.SurfaceTextureListener, VideoPlayer.OnPlayListener {
-    private static final String TAG = "VideoView";
-
+public class VideoView extends TextureView implements TextureView.SurfaceTextureListener {
     private final VideoPlayer videoPlayer = new VideoPlayer();
 
     private String path;
@@ -23,16 +21,15 @@ public class VideoView extends TextureView implements TextureView.SurfaceTexture
     private int mRatioHeight = 0;
 
     public VideoView(@NonNull Context context) {
-        this(context, null);
+        super(context);
     }
 
     public VideoView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        this(context, attrs, 0);
+        super(context, attrs);
     }
 
     public VideoView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        videoPlayer.setOnPlayListener(this);
     }
 
     public void start(String path, boolean isLoop) {
@@ -59,6 +56,18 @@ public class VideoView extends TextureView implements TextureView.SurfaceTexture
 
     public void stop() {
         videoPlayer.stop();
+    }
+
+    public int getCurPos() {
+        return videoPlayer.getCurPos();
+    }
+
+    public int getDuration() {
+        return videoPlayer.getDuration();
+    }
+
+    public boolean isPlaying() {
+        return videoPlayer.isPlaying();
     }
 
     @Override
@@ -112,28 +121,7 @@ public class VideoView extends TextureView implements TextureView.SurfaceTexture
         stop();
     }
 
-    @Override
-    public void onStart(int width, int height) {
-        setAspectRatio(width, height);
-    }
-
-    @Override
-    public void onPause() {
-
-    }
-
-    @Override
-    public void onStop() {
-
-    }
-
-    @Override
-    public void onComplete() {
-
-    }
-
-    @Override
-    public void onError() {
-
+    public void setOnPlayListener(VideoPlayer.OnPlayListener onPlayListener) {
+        videoPlayer.setOnPlayListener(onPlayListener);
     }
 }

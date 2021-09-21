@@ -46,6 +46,7 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
         if (time >= duration) {
             return;
         }
+        Log.d(TAG, "seekTo: " + time);
         mediaPlayer.seekTo(time);
     }
 
@@ -71,6 +72,27 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
         }
     }
 
+    public int getCurPos() {
+        if (mediaPlayer == null) {
+            return 0;
+        }
+        return mediaPlayer.getCurrentPosition();
+    }
+
+    public int getDuration() {
+        if (mediaPlayer == null) {
+            return 0;
+        }
+        return mediaPlayer.getDuration();
+    }
+
+    public boolean isPlaying() {
+        if (mediaPlayer == null) {
+            return false;
+        }
+        return mediaPlayer.isPlaying();
+    }
+
     @Override
     public void onPrepared(MediaPlayer mp) {
         if (mp == null) {
@@ -78,7 +100,7 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
         }
         mp.start();
         if (onPlayListener != null) {
-            onPlayListener.onStart(mp.getVideoWidth(), mp.getVideoHeight());
+            onPlayListener.onStart(mp.getVideoWidth(), mp.getVideoHeight(), mp.getDuration());
         }
     }
 
@@ -106,7 +128,7 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
     }
 
     public interface OnPlayListener {
-        void onStart(int width, int height);
+        void onStart(int width, int height, int duration);
 
         void onPause();
 
