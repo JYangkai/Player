@@ -11,22 +11,28 @@ import androidx.annotation.Nullable;
 
 import com.yk.player.media.VideoPlayer;
 
-public class VideoView extends TextureView implements TextureView.SurfaceTextureListener {
+public class VideoView extends TextureView implements TextureView.SurfaceTextureListener, VideoPlayer.OnPlayListener {
+    private static final String TAG = "VideoView";
+
     private final VideoPlayer videoPlayer = new VideoPlayer();
 
     private String path;
     private boolean isLoop;
 
+    private int mRatioWidth = 0;
+    private int mRatioHeight = 0;
+
     public VideoView(@NonNull Context context) {
-        super(context);
+        this(context, null);
     }
 
     public VideoView(@NonNull Context context, @Nullable AttributeSet attrs) {
-        super(context, attrs);
+        this(context, attrs, 0);
     }
 
     public VideoView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
+        videoPlayer.setOnPlayListener(this);
     }
 
     public void start(String path, boolean isLoop) {
@@ -75,9 +81,59 @@ public class VideoView extends TextureView implements TextureView.SurfaceTexture
 
     }
 
+    public void setAspectRatio(int width, int height) {
+        if (width < 0 || height < 0) {
+            throw new IllegalArgumentException("Size cannot be negative.");
+        }
+        mRatioWidth = width;
+        mRatioHeight = height;
+        requestLayout();
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int width = MeasureSpec.getSize(widthMeasureSpec);
+        int height = MeasureSpec.getSize(heightMeasureSpec);
+        if (0 == mRatioWidth || 0 == mRatioHeight) {
+            setMeasuredDimension(width, height);
+        } else {
+            if (width < height * mRatioWidth / mRatioHeight) {
+                setMeasuredDimension(width, width * mRatioHeight / mRatioWidth);
+            } else {
+                setMeasuredDimension(height * mRatioWidth / mRatioHeight, height);
+            }
+        }
+    }
+
     @Override
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
         stop();
+    }
+
+    @Override
+    public void onStart(int width, int height) {
+        setAspectRatio(width, height);
+    }
+
+    @Override
+    public void onPause() {
+
+    }
+
+    @Override
+    public void onStop() {
+
+    }
+
+    @Override
+    public void onComplete() {
+
+    }
+
+    @Override
+    public void onError() {
+
     }
 }

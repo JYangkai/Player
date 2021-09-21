@@ -54,6 +54,9 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
             return;
         }
         mediaPlayer.pause();
+        if (onPlayListener != null) {
+            onPlayListener.onPause();
+        }
     }
 
     public void stop() {
@@ -63,6 +66,9 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
         mediaPlayer.stop();
         mediaPlayer.reset();
         mediaPlayer.release();
+        if (onPlayListener != null) {
+            onPlayListener.onStop();
+        }
     }
 
     @Override
@@ -71,16 +77,43 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
             return;
         }
         mp.start();
+        if (onPlayListener != null) {
+            onPlayListener.onStart(mp.getVideoWidth(), mp.getVideoHeight());
+        }
     }
 
     @Override
     public void onCompletion(MediaPlayer mp) {
         Log.d(TAG, "onCompletion: ");
+        if (onPlayListener != null) {
+            onPlayListener.onComplete();
+        }
     }
 
     @Override
     public boolean onError(MediaPlayer mp, int what, int extra) {
         Log.e(TAG, "onError: " + extra);
+        if (onPlayListener != null) {
+            onPlayListener.onError();
+        }
         return false;
+    }
+
+    private OnPlayListener onPlayListener;
+
+    public void setOnPlayListener(OnPlayListener onPlayListener) {
+        this.onPlayListener = onPlayListener;
+    }
+
+    public interface OnPlayListener {
+        void onStart(int width, int height);
+
+        void onPause();
+
+        void onStop();
+
+        void onComplete();
+
+        void onError();
     }
 }
