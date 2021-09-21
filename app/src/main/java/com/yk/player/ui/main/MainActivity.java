@@ -1,70 +1,78 @@
 package com.yk.player.ui.main;
 
 import android.os.Bundle;
-import android.util.Log;
-import android.view.View;
 
+import androidx.appcompat.widget.Toolbar;
+import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
+import androidx.viewpager.widget.ViewPager;
+
+import com.google.android.material.tabs.TabLayout;
 import com.yk.player.R;
 import com.yk.player.mvp.BaseMvpActivity;
-import com.yk.player.rxjava.Observable;
-import com.yk.player.rxjava.Subscriber;
+import com.yk.player.utils.MyFragmentPagerAdapter;
+
+import java.util.List;
 
 public class MainActivity extends BaseMvpActivity<IMainView, MainPresenter> implements IMainView {
-    private static final String TAG = "MainActivity";
+
+    private Toolbar toolbar;
+    private TabLayout tabLayout;
+    private ViewPager viewPager;
+
+    private MyFragmentPagerAdapter fragmentPagerAdapter;
+
+    @Override
+    public MainPresenter createPresenter() {
+        return new MainPresenter(this);
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        findView();
+        initData();
+        bindEvent();
+    }
 
-        findViewById(R.id.tv_test).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                Observable.fromCallable(new Observable.OnCallable<String>() {
-                    @Override
-                    public String call() {
-                        Log.d(TAG, "call: 1");
-                        return "Hello DIO";
-                    }
-                })
-                        .map(new Observable.Function1<String, Integer>() {
-                            @Override
-                            public Integer call(String s) {
-                                Log.d(TAG, "call: 2");
-                                return 123;
-                            }
-                        })
-                        .flatMap(new Observable.Function1<Integer, Observable<String>>() {
-                            @Override
-                            public Observable<String> call(Integer integer) {
-                                Log.d(TAG, "call: 3");
-                                return Observable.just("Hello JOJO");
-                            }
-                        })
-                        .subscribeOnIo()
-                        .observeOnUi()
-                        .subscribe(new Subscriber<String>() {
-                            @Override
-                            public void onNext(String s) {
-                                Log.d(TAG, "onNext: " + s);
-                            }
+    private void findView() {
+        toolbar = findViewById(R.id.toolbar);
+        tabLayout = findViewById(R.id.tabLayout);
+        viewPager = findViewById(R.id.viewPager);
+    }
 
-                            @Override
-                            public void onComplete() {
-                                Log.d(TAG, "onComplete: ");
-                            }
+    private void initData() {
+        setSupportActionBar(toolbar);
 
-                            @Override
-                            public void onError(Exception e) {
-                                Log.e(TAG, "onError: ", e);
-                            }
-                        });
-            }
-        });
+        presenter.loadVideoFragment();
+    }
+
+    private void bindEvent() {
     }
 
     @Override
-    public MainPresenter createPresenter() {
-        return new MainPresenter();
+    public void onLoadVideoFragment(List<String> titleList, List<Fragment> fragmentList) {
+        if (fragmentPagerAdapter != null) {
+            return;
+        }
+
+        if (titleList == null || titleList.isEmpty()) {
+            return;
+        }
+
+        if (fragmentList == null || fragmentList.isEmpty()) {
+            return;
+        }
+
+        fragmentPagerAdapter = new MyFragmentPagerAdapter(
+                getSupportFragmentManager(),
+                FragmentPagerAdapter.BEHAVIOR_RESUME_ONLY_CURRENT_FRAGMENT,
+                titleList, fragmentList
+        );
+
+        viewPager.setAdapter(fragmentPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
+        viewPager.setCurrentItem(0);
     }
 }

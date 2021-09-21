@@ -76,9 +76,19 @@ public class Observable<T> {
         return new Observable<>(new OnSubscribe<T>() {
             @Override
             public void call(Subscriber<T> subscriber) {
-                T t = onCallable.call();
-                subscriber.onNext(t);
-                subscriber.onComplete();
+                T t = null;
+                Exception exception = null;
+                try {
+                    t = onCallable.call();
+                } catch (Exception e) {
+                    exception = e;
+                }
+                if (exception != null) {
+                    subscriber.onError(exception);
+                } else {
+                    subscriber.onNext(t);
+                    subscriber.onComplete();
+                }
             }
         });
     }
