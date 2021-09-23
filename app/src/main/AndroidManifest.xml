@@ -17,7 +17,9 @@
         android:theme="@style/Theme.Player"
         tools:ignore="AllowBackup">
 
-        <activity android:name=".SplashActivity">
+        <activity
+            android:name=".SplashActivity"
+            android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -25,9 +27,12 @@
             </intent-filter>
         </activity>
 
-        <activity android:name=".ui.main.MainActivity" />
+        <activity
+            android:name=".ui.main.MainActivity"
+            android:launchMode="singleTask" />
         <activity
             android:name=".ui.play.PlayActivity"
+            android:launchMode="singleTask"
             android:theme="@style/FullscreenTheme" />
     </application>
 

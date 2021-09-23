@@ -7,6 +7,7 @@ import android.view.ViewGroup;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.widget.SearchView;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -35,6 +36,7 @@ public class ListFragment extends BaseMvpFragment<IListView, ListPresenter> impl
         return fragment;
     }
 
+    private SearchView searchView;
     private RecyclerView rvVideo;
     private VideoAdapter videoAdapter;
     private final List<Video> videoList = new ArrayList<>();
@@ -54,6 +56,7 @@ public class ListFragment extends BaseMvpFragment<IListView, ListPresenter> impl
     }
 
     private void findView(View view) {
+        searchView = view.findViewById(R.id.searchView);
         rvVideo = view.findViewById(R.id.rvVideo);
     }
 
@@ -85,6 +88,17 @@ public class ListFragment extends BaseMvpFragment<IListView, ListPresenter> impl
     }
 
     private void bindEvent() {
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                return false;
+            }
 
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                videoAdapter.getFilter().filter(newText);
+                return true;
+            }
+        });
     }
 }
