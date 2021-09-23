@@ -76,6 +76,7 @@ public class ListFragment extends BaseMvpFragment<IListView, ListPresenter> impl
         }
 
         List<Video> list = (List<Video>) o;
+        videoList.clear();
         videoList.addAll(list);
     }
 

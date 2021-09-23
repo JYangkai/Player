@@ -29,6 +29,7 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
 
     public VideoAdapter(List<Video> list) {
         this.list = list;
+        filterList.clear();
         filterList.addAll(list);
     }
 
