@@ -15,7 +15,8 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_centerInParent="true"
-        android:src="@drawable/ic_baseline_pause_24" />
+        android:src="@drawable/ic_baseline_pause_24"
+        android:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatImageView
         android:id="@+id/ivList"
@@ -24,18 +25,21 @@
         android:layout_alignParentLeft="true"
         android:layout_alignParentTop="true"
         android:layout_margin="32dp"
-        android:src="@drawable/ic_baseline_list_24" />
+        android:src="@drawable/ic_baseline_list_24"
+        android:visibility="gone" />
 
     <FrameLayout
         android:id="@+id/flVideoList"
         android:layout_width="400dp"
         android:layout_height="match_parent"
-        android:layout_alignParentRight="true" />
+        android:layout_alignParentRight="true"
+        android:visibility="gone" />
 
     <androidx.appcompat.widget.AppCompatSeekBar
         android:id="@+id/sbVideo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true" />
+        android:layout_alignParentBottom="true"
+        android:visibility="gone" />
 
 </RelativeLayout>
