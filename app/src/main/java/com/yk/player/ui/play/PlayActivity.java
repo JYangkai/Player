@@ -2,11 +2,14 @@ package com.yk.player.ui.play;
 
 import android.content.Context;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.SeekBar;
 
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.widget.AppCompatImageView;
 import androidx.appcompat.widget.AppCompatSeekBar;
@@ -40,6 +43,7 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
     private AppCompatImageView ivList;
     private FrameLayout flVideoList;
     private AppCompatSeekBar sbVideo;
+    private AppCompatImageView ivFullScreen;
 
     private final List<Video> videoList = new ArrayList<>();
     private int curPos = -1;
@@ -66,6 +70,7 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
         ivList = findViewById(R.id.ivList);
         flVideoList = findViewById(R.id.flVideoList);
         sbVideo = findViewById(R.id.sbVideo);
+        ivFullScreen = findViewById(R.id.ivFullScreen);
     }
 
     private void initData() {
@@ -94,6 +99,16 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
             public void onStart(int width, int height, int duration) {
                 videoView.setAspectRatio(width, height);
                 sbVideo.setMax(duration);
+
+                if (cachePos != null) {
+                    videoView.seekTo(cachePos);
+                }
+                cachePos = null;
+
+                if (cachePause != null) {
+                    pausePlay();
+                }
+                cachePause = null;
             }
 
             @Override
@@ -155,6 +170,26 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
                 videoView.seekTo(sbVideo.getProgress());
             }
         });
+
+        ivFullScreen.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+                } else {
+                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+                }
+            }
+        });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        } else {
+            super.onBackPressed();
+        }
     }
 
     @Override
@@ -208,12 +243,14 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
         ivPause.setVisibility(View.VISIBLE);
         ivList.setVisibility(View.VISIBLE);
         sbVideo.setVisibility(View.VISIBLE);
+        ivFullScreen.setVisibility(View.VISIBLE);
     }
 
     private void hideController() {
         ivPause.setVisibility(View.GONE);
         ivList.setVisibility(View.GONE);
         sbVideo.setVisibility(View.GONE);
+        ivFullScreen.setVisibility(View.GONE);
     }
 
     private boolean isShowController() {
@@ -228,5 +265,35 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
                 sbVideo.setProgress(videoView.getCurPos());
             }
         });
+    }
+
+    /**
+     * 缓存切换横竖屏时的播放时间
+     */
+    private Integer cachePos;
+
+    /**
+     * 缓存切换横竖屏时的暂停状态
+     */
+    private Boolean cachePause;
+
+    @Override
+    protected void onSaveInstanceState(@NonNull Bundle outState) {
+        super.onSaveInstanceState(outState);
+        int curPos = videoView.getCurPos();
+        boolean isPause = !videoView.isPlaying();
+        Log.d(TAG, "onSaveInstanceState: " + curPos);
+        outState.putInt("cur_pos", curPos);
+        outState.putBoolean("is_pause", isPause);
+    }
+
+    @Override
+    protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
+        int curPos = savedInstanceState.getInt("cur_pos");
+        boolean isPause = savedInstanceState.getBoolean("is_pause");
+        Log.d(TAG, "onRestoreInstanceState: " + curPos);
+        cachePos = curPos;
+        cachePause = isPause;
     }
 }
