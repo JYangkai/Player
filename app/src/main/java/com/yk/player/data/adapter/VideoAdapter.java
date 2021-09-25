@@ -17,6 +17,7 @@ import com.bumptech.glide.Glide;
 import com.yk.player.R;
 import com.yk.player.data.bean.Video;
 import com.yk.player.ui.play.PlayActivity;
+import com.yk.player.utils.TimeUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +57,8 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
         Video video = filterList.get(position);
         Glide.with(context).load(video.getPath()).into(holder.ivCover);
         holder.tvName.setText(video.getName());
-        holder.tvDuration.setText(String.valueOf(video.getDuration()));
+        holder.tvDuration.setText(TimeUtils.getDuration(video.getDuration()));
+        holder.tvTime.setText(TimeUtils.getTime(video.getCreateTime()));
     }
 
     @Override
@@ -101,12 +103,14 @@ public class VideoAdapter extends RecyclerView.Adapter<VideoAdapter.ViewHolder> 
         AppCompatImageView ivCover;
         AppCompatTextView tvName;
         AppCompatTextView tvDuration;
+        AppCompatTextView tvTime;
 
         public ViewHolder(@NonNull View itemView) {
             super(itemView);
             ivCover = itemView.findViewById(R.id.ivCover);
             tvName = itemView.findViewById(R.id.tvName);
             tvDuration = itemView.findViewById(R.id.tvDuration);
+            tvTime = itemView.findViewById(R.id.tvTime);
         }
     }
 }

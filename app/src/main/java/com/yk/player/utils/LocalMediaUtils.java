@@ -29,8 +29,10 @@ public class LocalMediaUtils {
             String name = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DISPLAY_NAME));
             String path = cursor.getString(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATA));
             long duration = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DURATION));
+            long createTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_ADDED));
+            long updateTime = cursor.getLong(cursor.getColumnIndexOrThrow(MediaStore.Video.Media.DATE_MODIFIED));
 
-            Video video = new Video(name, path, duration);
+            Video video = new Video(name, path, duration, createTime * 1000, updateTime * 1000);
 
             list.add(video);
         }
