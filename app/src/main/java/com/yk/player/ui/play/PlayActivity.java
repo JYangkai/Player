@@ -4,21 +4,20 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.FrameLayout;
-import android.widget.SeekBar;
+import android.widget.RelativeLayout;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
-import androidx.appcompat.widget.AppCompatImageView;
-import androidx.appcompat.widget.AppCompatSeekBar;
 
 import com.yk.player.R;
 import com.yk.player.data.bean.Video;
 import com.yk.player.media.VideoPlayer;
 import com.yk.player.mvp.BaseMvpActivity;
 import com.yk.player.ui.list.ListFragment;
+import com.yk.player.ui.view.VideoController;
 import com.yk.player.ui.view.VideoView;
 
 import java.io.Serializable;
@@ -31,24 +30,20 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
     private static final String EXTRA_VIDEO_LIST = "extra_video_list";
     private static final String EXTRA_CUR_POS = "extra_cur_pos";
 
+    private FrameLayout flVideoView;
+    private VideoView videoView;
+    private VideoController videoController;
+    private FrameLayout flVideoList;
+
+    private final List<Video> videoList = new ArrayList<>();
+    private int curPos = -1;
+
     public static void startPlayActivity(Context context, List<Video> list, int curPos) {
         Intent intent = new Intent(context, PlayActivity.class);
         intent.putExtra(EXTRA_VIDEO_LIST, (Serializable) list);
         intent.putExtra(EXTRA_CUR_POS, curPos);
         context.startActivity(intent);
     }
-
-    private VideoView videoView;
-    private AppCompatImageView ivPause;
-    private AppCompatImageView ivList;
-    private FrameLayout flVideoList;
-    private AppCompatSeekBar sbVideo;
-    private AppCompatImageView ivFullScreen;
-
-    private final List<Video> videoList = new ArrayList<>();
-    private int curPos = -1;
-
-    private boolean isPause = false;
 
     @Override
     public PlayPresenter createPresenter() {
@@ -65,12 +60,10 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
     }
 
     private void findView() {
+        flVideoView = findViewById(R.id.flVideoView);
         videoView = findViewById(R.id.videoView);
-        ivPause = findViewById(R.id.ivPause);
-        ivList = findViewById(R.id.ivList);
+        videoController = findViewById(R.id.videoController);
         flVideoList = findViewById(R.id.flVideoList);
-        sbVideo = findViewById(R.id.sbVideo);
-        ivFullScreen = findViewById(R.id.ivFullScreen);
     }
 
     private void initData() {
@@ -80,16 +73,32 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
         }
 
         curPos = getIntent().getIntExtra(EXTRA_CUR_POS, curPos);
+
+        videoController.setTitle(videoList.get(curPos).getName());
+
+        loadFragment();
+    }
+
+    private void loadFragment() {
+        getSupportFragmentManager().beginTransaction()
+                .replace(R.id.flVideoList, ListFragment.newInstance(videoList))
+                .commit();
     }
 
     private void bindEvent() {
-        videoView.setOnClickListener(new View.OnClickListener() {
+        flVideoView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (isShowController()) {
-                    hideController();
+                if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+                    if (isViewShow(flVideoList)) {
+                        hideVideoList();
+                    }
+                }
+
+                if (isViewShow(videoController)) {
+                    hideVideoController();
                 } else {
-                    showController();
+                    showVideoController();
                 }
             }
         });
@@ -98,17 +107,12 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
             @Override
             public void onStart(int width, int height, int duration) {
                 videoView.setAspectRatio(width, height);
-                sbVideo.setMax(duration);
+                videoController.setMax(duration);
 
                 if (cachePos != null) {
                     videoView.seekTo(cachePos);
                 }
                 cachePos = null;
-
-                if (cachePause != null) {
-                    pausePlay();
-                }
-                cachePause = null;
             }
 
             @Override
@@ -132,74 +136,63 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
             }
         });
 
-        ivPause.setOnClickListener(new View.OnClickListener() {
+        videoController.setOnClickControllerListener(new VideoController.OnClickControllerListener() {
             @Override
-            public void onClick(View v) {
-                if (videoView.isPlaying()) {
-                    pausePlay();
+            public void onClickBack() {
+                finish();
+            }
+
+            @Override
+            public void onClickMore(View view) {
+                if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_PORTRAIT) {
+                    // 竖屏
+                    return;
+                }
+
+                // 横屏
+                if (isViewShow(flVideoList)) {
+                    hideVideoList();
                 } else {
-                    continuePlay();
+                    showVideoList();
                 }
             }
-        });
 
-        ivList.setOnClickListener(new View.OnClickListener() {
             @Override
-            public void onClick(View v) {
-                if (flVideoList.getVisibility() == View.VISIBLE) {
-                    flVideoList.setVisibility(View.GONE);
-                } else {
-                    flVideoList.setVisibility(View.VISIBLE);
-                }
+            public void onClickPause() {
+                pausePlay();
+            }
+
+            @Override
+            public void onClickPlay() {
+                continuePlay();
+            }
+
+            @Override
+            public void onSeekBar(int progress) {
+                videoView.seekTo(progress);
+            }
+
+            @Override
+            public void onFullScreen() {
+                fullScreen();
+            }
+
+            @Override
+            public void onFullScreenExit() {
+                fullScreenExit();
             }
         });
-
-        sbVideo.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
-            @Override
-            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
-
-            }
-
-            @Override
-            public void onStartTrackingTouch(SeekBar seekBar) {
-
-            }
-
-            @Override
-            public void onStopTrackingTouch(SeekBar seekBar) {
-                videoView.seekTo(sbVideo.getProgress());
-            }
-        });
-
-        ivFullScreen.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-                } else {
-                    setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
-                }
-            }
-        });
-    }
-
-    @Override
-    public void onBackPressed() {
-        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
-            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        } else {
-            super.onBackPressed();
-        }
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         startPlay();
-        loadFragment();
         presenter.startPosTimerTask();
         isPause = false;
     }
+
+    private boolean isPause = false;
 
     @Override
     protected void onPause() {
@@ -219,42 +212,82 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
         } else {
             videoView.start(videoList.get(curPos).getPath(), true);
         }
-
-        ivPause.setImageResource(R.drawable.ic_baseline_pause_24);
     }
 
     private void continuePlay() {
         videoView.continuePlay();
-        ivPause.setImageResource(R.drawable.ic_baseline_pause_24);
     }
 
     private void pausePlay() {
         videoView.pause();
-        ivPause.setImageResource(R.drawable.ic_baseline_play_arrow_24);
     }
 
-    private void loadFragment() {
-        getSupportFragmentManager().beginTransaction()
-                .replace(R.id.flVideoList, ListFragment.newInstance(videoList))
-                .commit();
+    private void showVideoController() {
+        videoController.setVisibility(View.VISIBLE);
     }
 
-    private void showController() {
-        ivPause.setVisibility(View.VISIBLE);
-        ivList.setVisibility(View.VISIBLE);
-        sbVideo.setVisibility(View.VISIBLE);
-        ivFullScreen.setVisibility(View.VISIBLE);
+    private void hideVideoController() {
+        videoController.setVisibility(View.GONE);
     }
 
-    private void hideController() {
-        ivPause.setVisibility(View.GONE);
-        ivList.setVisibility(View.GONE);
-        sbVideo.setVisibility(View.GONE);
-        ivFullScreen.setVisibility(View.GONE);
+    private void showVideoList() {
+        flVideoList.setVisibility(View.VISIBLE);
     }
 
-    private boolean isShowController() {
-        return ivPause.getVisibility() == View.VISIBLE && ivList.getVisibility() == View.VISIBLE;
+    private void hideVideoList() {
+        flVideoList.setVisibility(View.GONE);
+    }
+
+    private boolean isViewShow(View view) {
+        return view.getVisibility() == View.VISIBLE;
+    }
+
+    private boolean fullScreen() {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            // 横屏
+            return false;
+        }
+        // 竖屏
+        int width = videoView.getMediaPlay().getVideoWidth();
+        int height = videoView.getMediaPlay().getVideoHeight();
+
+        if (width > height) {
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        } else {
+            setViewSize(flVideoView, ViewGroup.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT);
+            hideVideoList();
+        }
+        return true;
+    }
+
+    private boolean fullScreenExit() {
+        if (getRequestedOrientation() == ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE) {
+            // 横屏
+            setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+            return true;
+        }
+        // 竖屏
+        int width = videoView.getMediaPlay().getVideoWidth();
+        int height = videoView.getMediaPlay().getVideoHeight();
+
+        if (width < height) {
+            setViewSize(flVideoView, ViewGroup.LayoutParams.MATCH_PARENT, dip2px(this, 200));
+            showVideoList();
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isFullScreen() {
+        ViewGroup.LayoutParams layoutParams = flVideoView.getLayoutParams();
+        return layoutParams.width == ViewGroup.LayoutParams.MATCH_PARENT && layoutParams.height == ViewGroup.LayoutParams.MATCH_PARENT;
+    }
+
+    private void setViewSize(View view, int width, int height) {
+        RelativeLayout.LayoutParams layoutParams = (RelativeLayout.LayoutParams) view.getLayoutParams();
+        layoutParams.width = width;
+        layoutParams.height = height;
+        view.setLayoutParams(layoutParams);
     }
 
     @Override
@@ -262,9 +295,17 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
         runOnUiThread(new Runnable() {
             @Override
             public void run() {
-                sbVideo.setProgress(videoView.getCurPos());
+                videoController.setProgress(videoView.getCurPos());
             }
         });
+    }
+
+    @Override
+    public void onBackPressed() {
+        if (isFullScreen() && fullScreenExit()) {
+            return;
+        }
+        super.onBackPressed();
     }
 
     /**
@@ -272,28 +313,22 @@ public class PlayActivity extends BaseMvpActivity<IPlayView, PlayPresenter> impl
      */
     private Integer cachePos;
 
-    /**
-     * 缓存切换横竖屏时的暂停状态
-     */
-    private Boolean cachePause;
-
     @Override
     protected void onSaveInstanceState(@NonNull Bundle outState) {
         super.onSaveInstanceState(outState);
         int curPos = videoView.getCurPos();
-        boolean isPause = !videoView.isPlaying();
-        Log.d(TAG, "onSaveInstanceState: " + curPos);
         outState.putInt("cur_pos", curPos);
-        outState.putBoolean("is_pause", isPause);
     }
 
     @Override
     protected void onRestoreInstanceState(@NonNull Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
         int curPos = savedInstanceState.getInt("cur_pos");
-        boolean isPause = savedInstanceState.getBoolean("is_pause");
-        Log.d(TAG, "onRestoreInstanceState: " + curPos);
         cachePos = curPos;
-        cachePause = isPause;
+    }
+
+    public static int dip2px(Context context, float dipValue) {
+        float scale = context.getResources().getDisplayMetrics().density;
+        return (int) (dipValue * scale + 0.5f);
     }
 }

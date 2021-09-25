@@ -1,68 +1,33 @@
 <?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:layout_height="match_parent">
 
-    <RelativeLayout
+    <FrameLayout
+        android:id="@+id/flVideoView"
         android:layout_width="match_parent"
         android:layout_height="200dp"
+        android:layout_alignParentTop="true"
         android:background="@color/black">
 
         <com.yk.player.ui.view.VideoView
             android:id="@+id/videoView"
             android:layout_width="wrap_content"
-            android:layout_height="200dp"
-            android:layout_centerInParent="true" />
-
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivPause"
-            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_centerInParent="true"
-            android:src="@drawable/ic_baseline_pause_24"
-            android:visibility="gone" />
+            android:layout_gravity="center" />
 
-        <androidx.appcompat.widget.AppCompatImageView
-            android:id="@+id/ivList"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentTop="true"
-            android:layout_margin="32dp"
-            android:src="@drawable/ic_baseline_list_24"
-            android:visibility="gone" />
-
-        <LinearLayout
+        <com.yk.player.ui.view.VideoController
+            android:id="@+id/videoController"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="center_vertical"
-            android:orientation="horizontal"
-            android:padding="16dp">
+            android:layout_height="match_parent"
+            android:layout_gravity="center" />
 
-            <androidx.appcompat.widget.AppCompatSeekBar
-                android:id="@+id/sbVideo"
-                android:layout_width="0dp"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                android:visibility="gone" />
-
-            <androidx.appcompat.widget.AppCompatImageView
-                android:id="@+id/ivFullScreen"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:src="@drawable/ic_baseline_fullscreen_24"
-                android:visibility="gone" />
-
-        </LinearLayout>
-
-    </RelativeLayout>
+    </FrameLayout>
 
     <FrameLayout
         android:id="@+id/flVideoList"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
+        android:layout_height="match_parent"
+        android:layout_below="@id/flVideoView" />
 
-</LinearLayout>
+</RelativeLayout>

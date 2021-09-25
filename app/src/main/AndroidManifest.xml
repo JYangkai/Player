@@ -32,7 +32,6 @@
             android:launchMode="singleTask" />
         <activity
             android:name=".ui.play.PlayActivity"
-            android:launchMode="singleTask"
             android:theme="@style/FullscreenTheme" />
     </application>
 

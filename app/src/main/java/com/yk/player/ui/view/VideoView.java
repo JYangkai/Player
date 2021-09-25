@@ -2,6 +2,7 @@ package com.yk.player.ui.view;
 
 import android.content.Context;
 import android.graphics.SurfaceTexture;
+import android.media.MediaPlayer;
 import android.util.AttributeSet;
 import android.view.Surface;
 import android.view.TextureView;
@@ -68,6 +69,10 @@ public class VideoView extends TextureView implements TextureView.SurfaceTexture
 
     public boolean isPlaying() {
         return videoPlayer.isPlaying();
+    }
+
+    public MediaPlayer getMediaPlay() {
+        return videoPlayer.getMediaPlayer();
     }
 
     @Override

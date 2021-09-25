@@ -93,6 +93,10 @@ public class VideoPlayer implements MediaPlayer.OnPreparedListener, MediaPlayer.
         return mediaPlayer.isPlaying();
     }
 
+    public MediaPlayer getMediaPlayer() {
+        return mediaPlayer;
+    }
+
     @Override
     public void onPrepared(MediaPlayer mp) {
         if (mp == null) {
