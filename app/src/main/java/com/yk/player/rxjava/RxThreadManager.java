@@ -6,23 +6,23 @@ import android.os.Looper;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-public class ThreadManager {
+public class RxThreadManager {
 
-    private static volatile ThreadManager instance;
+    private static volatile RxThreadManager instance;
 
     private final Handler uiHandler = new Handler(Looper.getMainLooper());
 
     private final ExecutorService ioThread;
 
-    private ThreadManager() {
+    private RxThreadManager() {
         ioThread = Executors.newSingleThreadExecutor();
     }
 
-    public static ThreadManager getInstance() {
+    public static RxThreadManager getInstance() {
         if (instance == null) {
-            synchronized (ThreadManager.class) {
+            synchronized (RxThreadManager.class) {
                 if (instance == null) {
-                    instance = new ThreadManager();
+                    instance = new RxThreadManager();
                 }
             }
         }

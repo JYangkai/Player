@@ -164,7 +164,7 @@ public class Observable<T> {
         return new Observable<>(new OnSubscribe<T>() {
             @Override
             public void call(Subscriber<T> subscriber) {
-                ThreadManager.getInstance().postIo(new Runnable() {
+                RxThreadManager.getInstance().postIo(new Runnable() {
                     @Override
                     public void run() {
                         subscribe(new Subscriber<T>() {
@@ -201,7 +201,7 @@ public class Observable<T> {
                 subscribe(new Subscriber<T>() {
                     @Override
                     public void onNext(T t) {
-                        ThreadManager.getInstance().postUi(new Runnable() {
+                        RxThreadManager.getInstance().postUi(new Runnable() {
                             @Override
                             public void run() {
                                 subscriber.onNext(t);
@@ -211,7 +211,7 @@ public class Observable<T> {
 
                     @Override
                     public void onComplete() {
-                        ThreadManager.getInstance().postUi(new Runnable() {
+                        RxThreadManager.getInstance().postUi(new Runnable() {
                             @Override
                             public void run() {
                                 subscriber.onComplete();
