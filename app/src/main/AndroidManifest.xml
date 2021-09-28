@@ -18,8 +18,7 @@
         tools:ignore="AllowBackup">
 
         <activity
-            android:name=".SplashActivity"
-            android:launchMode="singleTask">
+            android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -27,9 +26,7 @@
             </intent-filter>
         </activity>
 
-        <activity
-            android:name=".ui.main.MainActivity"
-            android:launchMode="singleTask" />
+        <activity android:name=".ui.main.MainActivity" />
         <activity
             android:name=".ui.play.PlayActivity"
             android:screenOrientation="behind"
